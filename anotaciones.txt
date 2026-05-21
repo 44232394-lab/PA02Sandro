@@ -1,0 +1,9 @@
+PROMPT UTILIZADO PARA EL DESARROLLO:
+"Actúa como un desarrollador experto en Python y Data Science. Necesito crear una aplicación web interactiva utilizando Streamlit para desplegar un modelo predictivo de clasificación basado en el Boston Housing dataset. 
+
+La aplicación debe cumplir con los siguientes requerimientos estructurales y visuales:
+1. En la barra lateral (sidebar), mostrar obligatoriamente el nombre del estudiante, código ISIL y un enlace HTML hipervinculado que redirija al cuaderno de Google Colab en modo lector.
+2. Un título principal claro y un contenedor de texto explicativo que detalle que el modelo predice si una vivienda es de 'Alto Valor' o 'Bajo/Medio Valor' usando Random Forest.
+3. En el cuerpo principal, disponer de elementos interactivos (sliders y campos numéricos) distribuidos de forma simétrica para capturar las variables predictoras clave: crim, rm, age, dis y tax.
+4. Un botón de acción a lo ancho del contenedor que ejecute la predicción. Al presionarlo, debe cargar de manera interna los archivos '.pkl' alojados en la carpeta 'modelos/', transformar los datos ingresados con el escalador y aplicar el modelo de clasificación.
+5. El resultado predictivo debe mostrarse mediante componentes de alerta visuales nativos de Streamlit (success para alto valor y warning para bajo/medio valor)."
