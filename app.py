@@ -49,33 +49,38 @@ st.markdown("---")
 # Botón para ejecutar el procesamiento y la predicción del modelo
 if st.button("🔮 Calcular Clasificación de Valor", use_container_width=True):
     try:
-        # Ruta apuntando exactamente a tu carpeta y archivo real en GitHub
+        # Ruta apuntando a tu carpeta en GitHub
         ruta_modelo = os.path.join('modelos', 'modelo_boston_rf.pkl')
         
-        # Validación interna de existencia de archivo
         if not os.path.exists(ruta_modelo):
             st.error("Error Crítico: El archivo 'modelo_boston_rf.pkl' no se encuentra dentro de la carpeta 'modelos/'.")
         else:
-            # Carga del pipeline unificado entrenado en tu Colab
             pipeline = joblib.load(ruta_modelo)
             
-            # Reconstrucción del DataFrame con los inputs ingresados por el usuario
+            # Reconstrucción del DataFrame inicial con las 5 variables de los sliders
             datos_entrada = pd.DataFrame([[crim, rm, age, dis, tax]], 
                                          columns=['crim', 'rm', 'age', 'dis', 'tax'])
             
-            # Ajuste de nombres de columnas según el entrenamiento original de tu Colab
+            # VALORES PROMEDIO REALES para evitar el sobreajuste por ceros (0.0)
+            valores_por_defecto = {
+                'zn': 11.36, 'indus': 11.13, 'chas': 0.069, 'nox': 0.55, 
+                'rad': 9.54, 'ptratio': 18.45, 'b': 356.67, 'lstat': 12.65
+            }
+            
+            # Rellenar las columnas faltantes usando los promedios del dataset original
             columnas_entrenamiento = pipeline.feature_names_in_ if hasattr(pipeline, 'feature_names_in_') else ['crim', 'rm', 'age', 'dis', 'tax']
             for col in columnas_entrenamiento:
                 if col not in datos_entrada.columns:
-                    datos_entrada[col] = 0.0
+                    # Si la columna no está en el slider, le asignamos su promedio real o 0.0 si no está en el diccionario
+                    datos_entrada[col] = valores_por_defecto.get(col, 0.0)
                     
-            # Alineamos las columnas estrictamente al orden del entrenamiento original
+            # Alineamos las columnas estrictamente al orden requerido por tu modelo
             datos_entrada = datos_entrada[columnas_entrenamiento]
             
-            # Inferencia directa usando el pipeline (que escala y predice internamente)
+            # Inferencia del modelo
             prediccion = pipeline.predict(datos_entrada)[0]
             
-            # Presentación de resultados visuales condicionales
+            # Presentación de resultados visuales
             st.subheader("🎯 Resultado del Modelo:")
             if prediccion == 1:
                 st.success("🎉 **VIVIENDA DE ALTO VALOR:** El inmueble se clasifica en el segmento de precios superiores del mercado.")
