@@ -14,7 +14,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# 10. REQUERIMIENTO OBLIGATORIO: Contenido de la Barra Lateral
+# REQUERIMIENTO OBLIGATORIO: Contenido de la Barra Lateral
 st.sidebar.title("Información del Alumno")
 st.sidebar.markdown(f"**Nombre:** \n{NOMBRE_ALUMNO}")
 st.sidebar.markdown("---")
@@ -49,24 +49,22 @@ st.markdown("---")
 # Botón para ejecutar el procesamiento y la predicción del modelo
 if st.button("🔮 Calcular Clasificación de Valor", use_container_width=True):
     try:
-        # Rutas dinámicas relativas a la carpeta 'modelos' exigida por la rúbrica
-        ruta_modelo = os.path.join('modelos', 'modelo_random_forest.pkl')
-        ruta_escalador = os.path.join('modelos', 'escalador_viviendas.pkl')
+        # Ruta apuntando exactamente a tu carpeta y archivo real en GitHub
+        ruta_modelo = os.path.join('modelos', 'modelo_boston_rf.pkl')
         
-        # Validación interna de existencia de archivos
-        if not os.path.exists(ruta_modelo) or not os.path.exists(ruta_escalador):
-            st.error("Error Crítico: Los archivos '.pkl' no se encuentran dentro de la carpeta 'modelos/'.")
+        # Validación interna de existencia de archivo
+        if not os.path.exists(ruta_modelo):
+            st.error("Error Crítico: El archivo 'modelo_boston_rf.pkl' no se encuentra dentro de la carpeta 'modelos/'.")
         else:
-            # Carga de los archivos binarios entrenados
-            modelo = joblib.load(ruta_modelo)
-            scaler = joblib.load(ruta_escalador)
+            # Carga del pipeline unificado entrenado en tu Colab
+            pipeline = joblib.load(ruta_modelo)
             
             # Reconstrucción del DataFrame con los inputs ingresados por el usuario
             datos_entrada = pd.DataFrame([[crim, rm, age, dis, tax]], 
                                          columns=['crim', 'rm', 'age', 'dis', 'tax'])
             
-            # Rellenar con 0 de forma neutra cualquier variable faltante si el scaler de la parte 1 pide más columnas
-            columnas_entrenamiento = scaler.feature_names_in_
+            # Ajuste de nombres de columnas según el entrenamiento original de tu Colab
+            columnas_entrenamiento = pipeline.feature_names_in_ if hasattr(pipeline, 'feature_names_in_') else ['crim', 'rm', 'age', 'dis', 'tax']
             for col in columnas_entrenamiento:
                 if col not in datos_entrada.columns:
                     datos_entrada[col] = 0.0
@@ -74,11 +72,8 @@ if st.button("🔮 Calcular Clasificación de Valor", use_container_width=True):
             # Alineamos las columnas estrictamente al orden del entrenamiento original
             datos_entrada = datos_entrada[columnas_entrenamiento]
             
-            # Aplicación de la estandarización matemática (Escalado)
-            datos_escalados = scaler.transform(datos_entrada)
-            
-            # Inferencia del modelo
-            prediccion = modelo.predict(datos_escalados)[0]
+            # Inferencia directa usando el pipeline (que escala y predice internamente)
+            prediccion = pipeline.predict(datos_entrada)[0]
             
             # Presentación de resultados visuales condicionales
             st.subheader("🎯 Resultado del Modelo:")
